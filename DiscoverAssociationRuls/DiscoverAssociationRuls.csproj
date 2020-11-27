@@ -42,8 +42,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\Instance.cs" />
+    <Compile Include="Utils\Math.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Model\TableInstance.cs" />
+    <Compile Include="Model\TablesCandidate.cs" />
+    <Compile Include="Model\TablesFrequentItemSetSizeOf.cs" />
+    <Compile Include="Model\Transaction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

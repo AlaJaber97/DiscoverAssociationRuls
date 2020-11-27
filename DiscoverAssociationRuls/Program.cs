@@ -6,49 +6,40 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscoverAssociationRuls
 {
     class Program
     {
-        static List<Transaction> Transactions;
-        static TablesCandidate CandidateTableSizeOf;
-        static TablesFrequentItemSetSizeOf FrequentItemSetSizeOf;
+        static List<Transaction> Transactions { get; set; }
+        static TablesCandidate CandidateTableSizeOf { get; set; }
+        static TablesFrequentItemSetSizeOf FrequentItemSetSizeOf { get; set; }
         static int MinimumSupport;
-        static int MinimumConfidence;
         static void Main()
         {
             try
             {
-                Transactions = new List<Transaction>();
-                CandidateTableSizeOf = new TablesCandidate();
-                FrequentItemSetSizeOf = new TablesFrequentItemSetSizeOf();
+                Init();
                 Console.Write("Plz. Enter Minimum Support:");
                 MinimumSupport = int.Parse(Console.ReadLine());
-                Console.Write("Plz. Enter and Minimum Confidence: ");
-                MinimumConfidence = int.Parse(Console.ReadLine());
-                GetTranstactionDataFromExcelFile(Directory.GetCurrentDirectory() + "\\DataTest.xlsx");
 
-                FrequentItemSetSizeOf.Add(GenarateCandidateTableSizeOfOf(1), MinimumSupport);
-                DisplayScreen(CandidateTableSizeOf[1], FrequentItemSetSizeOf[1]);
-                FrequentItemSetSizeOf.Add(GenarateCandidateTableSizeOfOf(2), MinimumSupport);
-                DisplayScreen(CandidateTableSizeOf[2], FrequentItemSetSizeOf[2]);
-                FrequentItemSetSizeOf.Add(GenarateCandidateTableSizeOfOf(3), MinimumSupport);
-                DisplayScreen(CandidateTableSizeOf[3], FrequentItemSetSizeOf[3]);
-                FrequentItemSetSizeOf.Add(GenarateCandidateTableSizeOfOf(4), MinimumSupport);
-                DisplayScreen(CandidateTableSizeOf[4], FrequentItemSetSizeOf[4]);
-
-                FrequentItemSetSizeOf.Add(GenarateCandidateTableSizeOfOf(5), MinimumSupport);
-                DisplayScreen(CandidateTableSizeOf[5], FrequentItemSetSizeOf[5]);
-
-                FrequentItemSetSizeOf.Add(GenarateCandidateTableSizeOfOf(6), MinimumSupport);
-                DisplayScreen(CandidateTableSizeOf[6], FrequentItemSetSizeOf[6]);
+                for(int i = 1; i < 7; i++)
+                {
+                    FrequentItemSetSizeOf.Add(GenarateCandidateTableSizeOfOf(i), MinimumSupport);
+                    DisplayScreen(CandidateTableSizeOf[i], FrequentItemSetSizeOf[i]);
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+        public static void Init()
+        {
+            Transactions = new List<Transaction>();
+            CandidateTableSizeOf = new TablesCandidate();
+            FrequentItemSetSizeOf = new TablesFrequentItemSetSizeOf();
+            GetTranstactionDataFromExcelFile(Directory.GetCurrentDirectory() + "\\DataTest.xlsx");
         }
         public static void SearchInDataAbout(string ItemSet)
         {
@@ -171,31 +162,6 @@ namespace DiscoverAssociationRuls
             }
             return ItemSet;
         }
-        public static List<string> JoinItemSetSizeOf(int SizeItemSetGenerated,string TransactionItems)
-        {
-            var Items = TransactionItems.Split(',').AsQueryable<string>().Select(s => s.Trim()).ToList<string>();
-            if (SizeItemSetGenerated > 1)
-            {
-                var NumberSteps = Math.Combinations(Items.Count(),SizeItemSetGenerated);
-                for (int Step = 0; Step < NumberSteps; Step++)
-                {
-                    var MainItemSet = string.Join(", ",Items.Take(SizeItemSetGenerated-1));
-                    Items.RemoveAll(item=>Items.Take(SizeItemSetGenerated - 1).Equals(item));
-
-                    for (int Index = 0; Index < Items.Count(); Index++)
-                    {
-                        string CurrentItemSet = Items[Index];
-                        List<string> OrderArray = new List<string>() { MainItemSet, CurrentItemSet };
-                        OrderArray.ForEach(item => { item.Trim(); item.ToLower(); });
-                        OrderArray.Sort();
-
-                        var newItem = string.Join(", ", OrderArray);
-                        Items.Add(newItem);
-                    }
-                }
-            }
-            return Items;
-        }
         public static bool CanJoinThisTwoItems(string Fstring, string Sstring)
         {
             int LastCommonMainItem = Fstring.LastIndexOf(',');
@@ -267,17 +233,6 @@ namespace DiscoverAssociationRuls
                 while (n-- != 0)
                     S += c;
         }
-        public static void PaddingLeft(ref string S, char c, int n)
-        {
-            string temp=string.Empty;
-            if (n > 0)
-            {
-                while (n-- != 0)
-                    temp += c;
-                temp += S;
-                S = temp;
-            }
-        }
         public static string FillSpace(string S, char c, int n)
         {
             string Temp = string.Empty;
@@ -285,125 +240,6 @@ namespace DiscoverAssociationRuls
             Temp += S;
             PaddingRight(ref Temp, c, (n - S.Length) / 2);
             return Temp;
-        }
-    }
-    public class Transaction
-    {
-        public Transaction(string TID, string ItemSet)
-        {
-            this.ItemSet = ItemSet;
-            this.TID = TID;
-        }
-        public string TID;
-        public string ItemSet;
-        public List<string> ItemSeparator { get => ItemSet.Split(',').AsQueryable<string>().Select(s => s.Trim()).ToList<string>(); }
-    }
-    public class TablesCandidate
-    {
-        public List<TableInstance> ListTableInstance;
-        List<Task> ListTask;
-        public TablesCandidate()
-        {
-            ListTableInstance = new List<TableInstance>();
-            ListTask = new List<Task>();
-        }
-        public TableInstance this[int indexrange]
-        {
-            get
-            {
-                if(indexrange > 0 && indexrange <= ListTableInstance.Count())
-                    return ListTableInstance[indexrange-1];
-                throw new Exception("not allowed use index out list");
-            }
-            set
-            {
-                if (indexrange > 0 && indexrange <= ListTableInstance.Count())
-                    ListTableInstance[indexrange-1] = value;
-                else
-                    throw new Exception("not allowed use index out list");
-            }
-        }
-        public void Add(TableInstance tableInstance)
-        {
-            this.ListTableInstance.Add(tableInstance);
-            foreach (var item in tableInstance.ListInstance)
-            {
-                Program.SearchInDataAbout(item.ItemSet);
-                //Task.Factory.StartNew(() => Program.SearchInDataAbout(item.ItemSet)).Wait();
-                //var NewTask = new Task(() => Program.SearchInDataAbout(item.ItemSet));
-                //ListTask.Add(NewTask);
-                //NewTask.Start();
-            }
-            //Task.WaitAll(ListTask.ToArray());
-        }
-    }
-    public class TablesFrequentItemSetSizeOf
-    {
-        public List<TableInstance> ListTableInstance;
-        public TablesFrequentItemSetSizeOf()
-        {
-            ListTableInstance = new List<TableInstance>();
-        }
-        public TableInstance this[int indexrange]
-        {
-            get
-            {
-                if (indexrange > 0 && indexrange <= ListTableInstance.Count())
-                    return ListTableInstance[indexrange - 1];
-                throw new Exception("not allowed use index out list");
-            }
-            set
-            {
-                if (indexrange > 0 && indexrange <= ListTableInstance.Count())
-                    ListTableInstance[indexrange - 1] = value;
-                else
-                    throw new Exception("not allowed use index out list");
-            }
-        }
-        public TableInstance Add(TableInstance tableCandidate, int MinimumSupport)
-        {
-            var tablefrequentItem = new TableInstance();
-            var frequentItem = tableCandidate.ListInstance.FindAll(item => item.SupportCount >= MinimumSupport).ToList<Instance>();
-            tablefrequentItem.ListInstance = frequentItem;
-            ListTableInstance.Add(tablefrequentItem);
-            return tablefrequentItem;
-        }
-    }
-    public class TableInstance
-    {
-        public List<Instance> ListInstance;
-        public TableInstance()
-        {
-            ListInstance = new List<Instance>();
-        }
-        public virtual TableInstance Add(Instance Table, int MinSup = 0) { return null; }
-    }
-    public class Instance
-    {
-        public string ItemSet;
-        public int SupportCount = 0;
-        public Instance(string ItemSet, int SupportCount)
-        {
-            this.ItemSet = ItemSet;
-            this.SupportCount = SupportCount;
-        }
-    }
-}
-
-namespace DiscoverAssociationRuls
-{
-    public class Math
-    {
-        private static int Fraction(int number)
-        {
-            if (number == 1)
-                return 1;
-            return number * Fraction(number - 1);
-        }
-
-        public static int Combinations(int NumberItems, int NumberUsed)
-        {
-            return Fraction(NumberItems) / (Fraction(NumberItems-NumberUsed)*Fraction(NumberUsed));
         }
     }
 }
